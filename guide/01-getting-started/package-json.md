@@ -119,3 +119,27 @@ import { someUtility } from 'my-logger/utils.js'; // This will throw an error
 When `exports` is provided, usually there's no need to specify the `main` field unless you need to support older versions of Node.js or some legacy tools that do not recognize the `exports` field.
 
 To learn more about the `exports` field, see [Node.js documentation on package exports](https://nodejs.org/api/packages.html#package-entry-points).
+
+## `package.json` lookups
+
+In Node.js, when a module is loaded using either `require()`, `import` or `import()`, Node.js will search for a `package.json` file starting from the directory in which the module being loaded resides. If it doesn't find one, it will continue searching up the directory tree until it either finds a `package.json` file or reaches the root of the filesystem. If any `package.json` file is found during this search, Node.js will use the fields in that file to determine how to load the module.
+
+This means that, for example, if you have a project structure like this:
+
+```
+my-project/
+├── node_modules/
+│   └── my-logger/
+│       ├── logger.js
+│       └── package.json
+├── src/
+│   └── app.js
+├── lib/
+│   ├── package.json
+│   └── utils.js
+└── package.json
+```
+
+When you run `node src/app.js` from `my-project`, Node.js will first look for a `package.json` file in the `src` directory, then in the `my-project` directory, and end up using `package.json` in `my-project` to determine how to load `src/app.js`. If `src/app.js` imports `my-logger`, Node.js will end up using the `package.json` file in the `my-logger` directory to determine how to load it. When `src/app.js` imports `../lib/utils.js`, however, Node.js will end up using `lib/package.json` to determine how to load `utils.js`.
+
+This means that different types of modules can coexist in the same project even if they all use the `.js` extension. For example if the `lib/package.json` file sets `"type": "commonjs"`, then `utils.js` can be written as a CommonJS module, even if the top-level `package.json` under `my-project` sets `"type": "module"` which allows `src/app.js` to be written as an ESM module. This is not recommended for new projects, but it can be useful when gradually migrating a codebase from CommonJS to ESM.
