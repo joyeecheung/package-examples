@@ -1,8 +1,7 @@
 import assert from 'node:assert';
 
 import { pkg, foo, bar, utils, lib } from 'my-module';
-import { after, before, describe, it } from 'node:test';
-import { once } from 'node:events';
+import { describe, it } from 'node:test';
 
 describe('migrating-imports', () => {
   describe('before', () => {
@@ -29,27 +28,16 @@ describe('migrating-imports', () => {
         assert.strictEqual(typeof kernelInfo, 'string');
       });
 
-      it('works with synchronous dynamic import of user modules', async () => {
-        const { readAndDecodeSync } = await import('my-module/read-decode');
-        const syncData = readAndDecodeSync('test-format');
-        assert.deepStrictEqual(syncData, {result: "sync-test-data"});
+      it('works with synchronous dynamic require for plugins', async () => {
+        const { initializePluginsSync } = await import('my-module/initialize-plugin-sync');
+        const results = initializePluginsSync(['plugin-a']);
+        assert.deepStrictEqual(results, ['plugin-a initialized']);
       });
 
-      describe('asynchronous dynamic imports', async () => {
-        const { server } = await import('./test-server.mjs');
-        before(async () => {
-          server.listen(0);
-          await once(server, 'listening');
-        });
-        after(() => {
-          server.close();
-        });
-
-        it('works with asynchronous dynamic import of user modules', async () => {
-          const { downloadAndDecode } = await import('my-module/download-decode');
-          const asyncData = await downloadAndDecode(`127.0.0.1:${server.address().port}`, 'test-format');
-          assert.deepStrictEqual(asyncData, {result: "async-test-data"});
-        });
+      it('works with asynchronous dynamic import for plugins', async () => {
+        const { initializePlugins } = await import('my-module/initialize-plugin-async');
+        const results = await initializePlugins(['plugin-b']);
+        assert.deepStrictEqual(results, ['plugin-b initialized']);
       });
     });
   });
