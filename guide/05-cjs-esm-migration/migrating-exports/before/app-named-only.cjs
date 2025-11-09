@@ -1,4 +1,3 @@
-const pkg = require('my-logger/named-only');
-const { Logger } = pkg;
-const logger = new Logger();
-logger.log('Hello from CommonJS');
+const pkg = require('my-module/named-only');
+const { Foo } = pkg;
+const foo = new Foo();

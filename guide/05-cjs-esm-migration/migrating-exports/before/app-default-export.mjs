@@ -1,2 +1,2 @@
-import logger from 'my-logger/default-export';
-logger.log('Hello from ESM');
+import qux from 'my-module/default-export';
+qux();

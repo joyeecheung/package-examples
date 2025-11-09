@@ -1,2 +1,2 @@
-const logger = require('my-logger/default-export');
-logger.log('Hello from CommonJS');
+const qux = require('my-module/default-export');
+qux();

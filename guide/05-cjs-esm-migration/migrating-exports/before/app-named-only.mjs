@@ -1,4 +1,3 @@
-import pkg from 'my-logger/named-only';
-const { Logger } = pkg;
-const logger = new Logger();
-logger.log('Hello from ESM');
+import pkg from 'my-module/named-only';
+const { Foo } = pkg;
+const foo = new Foo();

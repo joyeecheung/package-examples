@@ -13,6 +13,7 @@ CommonJS context-local variables aren’t available in ESM; use `import.meta` in
 | `__filename` | `import.meta.filename` | v20.11.0 / v21.2.0 |
 | `__dirname` | `import.meta.dirname` | v20.11.0 / v21.2.0 |
 | `require.main` | `import.meta.main` | v22.18.0 / v24.2.0 |
+| `require.resolve` | `import.meta.resolve` | v12.16.2+ |
 
 For older versions of Node.js where `import.meta.filename` and `import.meta.dirname` are not available, `import.meta.url` can be used to derive the filename and dirname using `fileURLToPath()` from `node:url`.
 

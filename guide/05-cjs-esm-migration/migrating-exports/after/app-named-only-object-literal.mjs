@@ -1,3 +1,2 @@
-import { Logger } from 'my-logger/named-only-object-literal';
-const logger = new Logger();
-logger.log('Hello from ESM');
+import { Baz } from 'my-module/named-only-object-literal';
+const baz = new Baz();

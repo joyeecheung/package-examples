@@ -10,8 +10,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'before'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('named-only can be imported from ESM', () => {
@@ -19,8 +18,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'before'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('named-only-object-literal can be required from CommonJS', () => {
@@ -28,8 +26,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'before'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('named-only-object-literal can be imported from ESM', () => {
@@ -37,8 +34,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'before'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('default-export can be required from CommonJS', () => {
@@ -46,8 +42,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'before'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('default-export can be imported from ESM', () => {
@@ -55,28 +50,17 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'before'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
-    it('default-and-named can be required from CommonJS', () => {
-      const result = spawnSync(process.execPath, ['app-default-and-named.cjs'], {
+    it('dynamic-exports can be imported from ESM', () => {
+      const result = spawnSync(process.execPath, ['app-using-dynamic-exports.mjs'], {
         cwd: join(import.meta.dirname, 'before'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
-      assert.match(result.stdout, /\[LOG\] Created new instance/);
-    });
-
-    it('default-and-named can be imported from ESM', () => {
-      const result = spawnSync(process.execPath, ['app-default-and-named.mjs'], {
-        cwd: join(import.meta.dirname, 'before'),
-        encoding: 'utf8',
-      });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
-      assert.match(result.stdout, /\[LOG\] Created new instance/);
+      assert.strictEqual(result.status, 0, result.stderr);
+      assert.match(result.stdout, /false/);
+      assert.match(result.stdout, /true/);
     });
   });
 
@@ -86,8 +70,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('named-only can be imported from ESM', () => {
@@ -95,8 +78,24 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
+      assert.strictEqual(result.status, 0, result.stderr);
+    });
+
+    it('named-only-partial can be imported from ESM', () => {
+      const result = spawnSync(process.execPath, ['app-importing-default-from-named-only-partial.mjs'], {
+        cwd: join(import.meta.dirname, 'after'),
+        encoding: 'utf8',
+      });
+      assert.strictEqual(result.status, 1, result.stderr);
+      assert.match(result.stderr, /does not provide an export named 'default'/);
+    });
+
+    it('named-only with default can be imported from ESM', () => {
+      const result = spawnSync(process.execPath, ['app-importing-default-from-named-only.mjs'], {
+        cwd: join(import.meta.dirname, 'after'),
+        encoding: 'utf8',
+      });
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('named-only-object-literal can be required from CommonJS', () => {
@@ -104,8 +103,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('named-only-object-literal can be imported from ESM', () => {
@@ -113,8 +111,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('default-export can be required from CommonJS', () => {
@@ -122,8 +119,7 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
     it('default-export can be imported from ESM', () => {
@@ -131,46 +127,41 @@ describe('migrating-exports', () => {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
-    it('default-export-naive can be required from CommonJS', () => {
-      const result = spawnSync(process.execPath, ['app-default-export-naive.cjs'], {
+    it('default-export-partial can be imported from ESM', () => {
+      const result = spawnSync(process.execPath, ['app-importing-default-export.mjs'], {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
-    it('default-export-naive can be imported from ESM', () => {
-      const result = spawnSync(process.execPath, ['app-default-export-naive.mjs'], {
+    it('default-export-partial cannot be required from CommonJS', () => {
+      const result = spawnSync(process.execPath, ['app-requiring-default-export-partial.cjs'], {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
+      assert.strictEqual(result.status, 1, result.stderr);
+      assert.match(result.stderr, /TypeError/);
     });
 
-    it('default-and-named can be required from CommonJS', () => {
-      const result = spawnSync(process.execPath, ['app-default-and-named.cjs'], {
+    it('default-export with module.exports can be required from CommonJS', () => {
+      const result = spawnSync(process.execPath, ['app-requiring-default-export.cjs'], {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from CommonJS/);
-      assert.match(result.stdout, /\[LOG\] Created new instance/);
+      assert.strictEqual(result.status, 0, result.stderr);
     });
 
-    it('default-and-named can be imported from ESM', () => {
-      const result = spawnSync(process.execPath, ['app-default-and-named.mjs'], {
+    it('dynamic-exports can be imported from ESM', () => {
+      const result = spawnSync(process.execPath, ['app-using-dynamic-exports.mjs'], {
         cwd: join(import.meta.dirname, 'after'),
         encoding: 'utf8',
       });
-      assert.strictEqual(result.status, 0);
-      assert.match(result.stdout, /\[LOG\] Hello from ESM/);
-      assert.match(result.stdout, /\[LOG\] Created new instance/);
+      assert.strictEqual(result.status, 0, result.stderr);
+      assert.match(result.stdout, /true/);
     });
   });
 });

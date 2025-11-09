@@ -1,3 +1,2 @@
-import { Logger } from 'my-logger/named-only';
-const logger = new Logger();
-logger.log('Hello from ESM');
+import { Foo } from 'my-module/named-only';
+const foo = new Foo();
