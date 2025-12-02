@@ -12,7 +12,7 @@ describe('migrating-imports', () => {
       });
       it('should fail when importing a path without file extension', async () => {
         await assert.rejects(
-          import('my-module/import-without-extension'),
+          import('my-module/load-without-extension'),
           { code: 'ERR_MODULE_NOT_FOUND' }
         );
       });

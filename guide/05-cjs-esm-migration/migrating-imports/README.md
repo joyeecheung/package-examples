@@ -69,14 +69,14 @@ const { bar } = cjsPkg;  // The destructuring happens at run time again.
 When using `require()`, it is possible to load a file without specifying its extension - in that case Node.js would try to append different supported extensions to the path and load the first one that exists on the file system. For example:
 
 ```js
-// before/node_modules/my-module/import-without-extension.js
+// before/node_modules/my-module/load-without-extension.js
 const lib = require('./lib');  // If lib.js exists in the same directory, it will load ./lib.js
 ```
 
 With `import`, however, extension probing is not supported; specify the extension during migration:
 
 ```js
-// after/node_modules/my-module/import-without-extension.js
+// after/node_modules/my-module/load-without-extension.js
 // Throws ERR_MODULE_NOT_FOUND because it only attempts to load a file with the exact name './lib'
 import lib from './lib';
 ```

@@ -180,7 +180,7 @@ exports.FooAlias = Foo;
 If we stop after converting only the named exports:
 
 ```js
-// before/node_modules/my-module/named-only-partial.js
+// after/node_modules/my-module/named-only-partial.js
 export class Foo { /* ... */ };
 export const bar = 'bar';
 export { Foo as FooAlias };
@@ -189,7 +189,7 @@ export { Foo as FooAlias };
 this would break ESM consumers that have been using a default import from the CommonJS version:
 
 ```js
-// after/app-importing-default-from-named-only-partial.js
+// after/app-importing-default-from-named-only-partial.mjs
 // This would break unless 'my-module' provides a default export during the migration
 import myModule from 'my-module/named-only-partial';
 ```
@@ -205,7 +205,7 @@ export default { Foo, bar, FooAlias: Foo };  // To be backward compatible with E
 ```
 
 ```js
-// after/app-importing-default-from-named-only.js
+// after/app-importing-default-from-named-only.mjs
 import myModule from 'my-module/named-only';
 ```
 
