@@ -6,7 +6,9 @@ description: Guide on migrating context-local variables in CommonJS to ESM.
 
 Examples in this chapter can be found [here](https://github.com/nodejs/package-examples/blob/main/guide/05-cjs-esm-migration/migrating-context-local-variables/).
 
-CommonJS context-local variables aren’t available in ESM; use `import.meta` instead.
+In CommonJS modules, there are several context-local variables that provide information about the current module and its execution context. When migrating to ESM, these variables need to be replaced with their ESM equivalents.
+
+In Node.js, most of the replacements are provided through the [`import.meta`](https://nodejs.org/api/esm.html#importmeta) object.
 
 | CommonJS | ESM Equivalent | Minimum Node.js Version |
 |----------|----------------|------------------------|
@@ -24,4 +26,4 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 ```
 
-The CommonJS `module` and `exports` variables do not exist in ESM, and there’s no direct equivalent for export introspection. In ESM, declare exports with `export` statements. See [Migrating exports](../migrating-exports/README.md) for details.
+In the case of `module` and `exports` variables, writes to them typically are done to set up exports for the module, in which case these usually can be replaced with `export` statements. See [Migrating exports](../migrating-exports/README.md) for details. ESM does not support reflection on module exports, so reads from these variables have no direct replacements in ESM.

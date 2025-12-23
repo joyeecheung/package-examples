@@ -13,13 +13,13 @@ When migrating a CommonJS module to ESM, there are two main considerations:
 
 Examples in this chapter can be found [here](https://github.com/nodejs/package-examples/blob/main/guide/05-cjs-esm-migration/migrating-exports/).
 
-## Translating to `export` syntax
+## Migrating to the `export` syntax
 
-Start by replacing assignments to `exports` or `module.exports` with ESM `export` syntax.
+In CommonJS, exports are typically done by writing to [the `module.exports` object or the `exports` shortcut](https://nodejs.org/api/modules.html#moduleexports). In ESM, exports are declared using [the `export` syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export).
 
-### Translating `exports.foo = ...` or `module.exports.foo = ...` to named exports
+### Migrating `exports.foo = ...` or `module.exports.foo = ...`
 
-CommonJS modules often expose named exports by assigning properties to `exports` or `module.exports`. Migrate these using [named exports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export#using_named_exports). For example, if a CommonJS module contains:
+Static property assignments to `exports` or `module.exports` can be directly translated to [named exports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export#using_named_exports) in ESM. For example, if a CommonJS module contains:
 
 ```js
 // before/node_modules/my-module/named-only.js
@@ -29,7 +29,7 @@ exports.Foo = Foo;
 exports.bar = 'bar';
 ```
 
-This translates to direct `export` statements:
+This can be migrated to direct `export` statements:
 
 ```js
 // after/node_modules/my-module/named-only.js
@@ -37,7 +37,7 @@ export class Foo { /* ... */ };
 export const bar = 'bar';
 ```
 
-Export aliases using the `export ... as ...` syntax:
+Aliases can be migrated using the `export ... as ...` syntax:
 
 ```js
 // before/node_modules/my-module/named-only.js
@@ -49,9 +49,9 @@ exports.FooAlias = Foo;
 export { Foo as FooAlias };
 ```
 
-### Translating `module.exports = { foo, ... }`
+### Migrating `module.exports = { foo, ... }`
 
-Some modules provide named exports by reassigning `module.exports` to an object literal. Translate this with `export { ... }`. For example:
+Some CommonJS modules provide named exports by reassigning `module.exports` to an object literal with static value properties. This can be migrated with the `export { ... }` syntax. For example:
 
 ```js
 // before/node_modules/my-module/named-only-object-literal.js
@@ -59,7 +59,7 @@ class Baz { /* ... */ }
 module.exports = { Baz };
 ```
 
-Translate to:
+can be migrated to:
 
 ```js
 // after/node_modules/my-module/named-only-object-literal.js
@@ -67,7 +67,7 @@ class Baz { /* ... */ }
 export { Baz };
 ```
 
-### Translating `module.exports = ...` that is not an object literal
+### Migrating `module.exports = notAnObjectLiteral`
 
 If `module.exports` is set to a value that is not an object literal, use the [`export default` syntax](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export#using_the_default_export). For example:
 
@@ -76,20 +76,20 @@ If `module.exports` is set to a value that is not an object literal, use the [`e
 module.exports = function qux() {};
 ```
 
-Translate to ESM as follows:
+can be migrated to ESM as follows:
 
 ```js
 // after/node_modules/my-module/default-export.js
 export default function qux() {};
 ```
 
-Note: Syntax translation alone isn’t enough here. See the [maintaining backward compatibility section](#for-commonjs-consumers-if-moduleexports-was-reassigned-to-a-non-object-literal) for additional steps.
+Note: in this case, additional care must be taken to if backward compatibilty for CommonJS consumers is needed. See the [maintaining backward compatibility section](#for-commonjs-consumers-if-moduleexports-was-reassigned-to-a-non-object-literal) for details.
 
 ### Re-exporting default exports from internal modules
 
 CommonJS modules can re-export from other modules by assigning properties from the required module to `exports` or `module.exports`. Translate these to ESM [`export ... from` statements](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export#using_export_from).
 
-For example, to re-export defaults from internal modules:
+For example, this CommonJS module:
 
 ```js
 // before/node_modules/my-module/re-export-defaults.js
@@ -97,7 +97,7 @@ exports.foo = require('./foo.js');
 exports.bar = require('./bar.js');
 ```
 
-Translate to ESM:
+can be migrated to ESM like this:
 
 ```js
 // after/node_modules/my-module/re-export-defaults.js
@@ -116,7 +116,7 @@ exports.name1 = name1;
 exports.name2 = name2;
 ```
 
-Translate to ESM:
+this can be migrated to ESM with [`export ... from` statements](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export#using_export_from) too:
 
 ```js
 // after/node_modules/my-module/re-export-names.js
@@ -152,7 +152,7 @@ module.exports = {
 };
 ```
 
-Translate to ESM:
+it can be migrated to ESM like this:
 
 ```js
 // after/node_modules/my-module/re-export-aggregate.js
@@ -164,7 +164,9 @@ export * from './log-names.js';
 
 ### For ESM consumers: always provide a default export
 
-When ESM consumers import a CommonJS module, the `module.exports` object is always available as a default export. To maintain compatibility for ESM consumers, always provide a default export, even if it seemingly only provides named exports.
+When a CommonJS module is loaded by a ESM consumer, its `module.exports` object is always available as a default export. When the module gets migrated to ESM, Node.js no longer adds this default export automatically; instead, the ESM provider is left to decide what should be the default export provided to ESM consumers.
+
+To maintain compatibility for ESM consumers, ESM migrated from CommonJS should always provide a default export in its external interface, even if it seemingly only provides named exports.
 
 Consider the following CommonJS module:
 
@@ -177,7 +179,7 @@ exports.bar = 'bar';
 exports.FooAlias = Foo;
 ```
 
-If we stop after converting only the named exports:
+If only convert the named exports:
 
 ```js
 // after/node_modules/my-module/named-only-partial.js
@@ -186,15 +188,17 @@ export const bar = 'bar';
 export { Foo as FooAlias };
 ```
 
-this would break ESM consumers that have been using a default import from the CommonJS version:
+the default export would be missing after migration, which would break ESM consumers that have been using the automatically added default export from the CommonJS external interface::
 
 ```js
 // after/app-importing-default-from-named-only-partial.mjs
-// This would break unless 'my-module' provides a default export during the migration
+// This used to be `module.exports` when the module was CommonJS,
+// but after the migration, the default export is missing unless explicitly provided,
+// so it would throw a SyntaxError.
 import myModule from 'my-module/named-only-partial';
 ```
 
-Maintain ESM compatibility by adding a default export:
+To close this gap, provide a default export in the migrated ESM, which typically aggregates the named exports:
 
 ```js
 // after/node_modules/my-module/named-only.js
@@ -209,9 +213,9 @@ export default { Foo, bar, FooAlias: Foo };  // To be backward compatible with E
 import myModule from 'my-module/named-only';
 ```
 
-### For CommonJS consumers: if `module.exports` was reassigned to a non-object-literal
+### If `module.exports` was reassigned to a non-object-literal
 
-If the CommonJS module previously reassigned `module.exports` to a value, unless that value is an object literal with static names (in which case, it essentially only contained named exports, and the `module.exports` value itself is likely not significant), CommonJS consumers would expect to `require()` to continue to return that value.
+If the CommonJS module previously reassigned `module.exports` to a value, unless that value is an object literal with static names (in which case, it essentially only contained named exports, and the `module.exports` value itself is likely insignificant), CommonJS consumers would expect to `require()` to continue to return that value. In this case, use the special `'module.exports'` named export in ESM to customize what `require(esm)` returns for CommonJS consumers.
 
 For example, if the CommonJS module contained:
 
@@ -240,7 +244,7 @@ However, as discussed in [the ESM interoperability guide](../../04-cjs-esm-inter
 // after/app-requiring-default-export-partial.cjs
 // The returned value is actually { default: [Function: qux] }
 const qux = require('my-module/default-export-partial');
-qux(); // Throws TypeError: qux is not a function
+qux(); // ⛔ Throws TypeError: qux is not a function
 ```
 
 To address this disparity, Node.js recognizes a special `'module.exports'` named export for ESM. When provided, `require(esm)` returns its value directly instead of the module namespace object.
@@ -259,7 +263,9 @@ qux(); // Now it works as expected.
 
 ## Dynamic exports
 
-Dynamically-added exports cannot be directly translated to ESM. ESM exports are static and must be known at compile time. Instead, use a static export shape with `undefined` placeholders and conditionally initialize the bindings.
+Dynamically-added exports cannot be directly translated to ESM. ESM exports are static and must be known at compile time.
+
+One typical approximation is to use a static export shape with `undefined` placeholders and conditionally initialize the bindings.
 
 For example, this CommonJS pattern:
 

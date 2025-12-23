@@ -8,7 +8,9 @@ Examples in this chapter can be found [here](https://github.com/nodejs/package-e
 
 ## The `"type"` field
 
-If ESM code is in `.js` files, add `"type": "module"` in the nearest `package.json` so Node.js treats `.js` as ESM.
+By default, Node.js treats `.js` files as CommonJS for backward compatibility. This can be overriden with the `"type"` field in the nearest `package.json`.
+
+If a package is migrated to ESM and the ESM code remains in `.js` files, the `"type"` field in `package.json` should be explicitly set to `"module"`.
 
 For example, a CommonJS package might look like this before migration:
 
@@ -19,7 +21,7 @@ my-logger/
                   // or does not have "type" field and relies on the "commonjs" default
 ```
 
-After migration, if ESM source remains in `.js`, explicitly set `"type": "module"` so Node.js loads `.js` files as ESM:
+After migration, if ESM source remains in `.js`, set `"type": "module"` explicitly so Node.js loads `.js` files as ESM:
 
 ```
 my-logger/
@@ -27,7 +29,7 @@ my-logger/
 └── package.json  // Needs to explicitly specify "type": "module" now
 ```
 
-If you can’t set `"type": "module"`, use the `.mjs` extension for migrated files. This helps during gradual migrations when some `.js` files remain CommonJS.
+If you can’t set `"type": "module"` for some reason, use the `.mjs` extension for migrated files. This may be useful during gradual migrations when the package is partially migrated to ESM while some `.js` files remain CommonJS.
 
 ```
 my-logger/
@@ -39,7 +41,7 @@ my-logger/
 
 ## The `"engines"` field
 
-As mentioned in the [chapter about shipping ESM for CommonJS consumers](../../04-cjs-esm-interop/shipping-esm-for-cjs/README.md#engines), use the `"engines"` field to limit installs to Node.js versions that support `require(esm)`. Many packages bump the major version when dropping older Node.js support. For example:
+As mentioned in the [chapter about shipping ESM for CommonJS consumers](../../04-cjs-esm-interop/shipping-esm-for-cjs/README.md#engines), when a CommonJS package is migrated to ESM, consider updating the `"engines"` field to limit installs to Node.js versions that support `require(esm)`. Many packages bump the major version when dropping older Node.js support too. For example:
 
 ```json
 {
@@ -57,4 +59,4 @@ As mentioned in the [chapter about shipping ESM for CommonJS consumers](../../04
 }
 ```
 
-This practice is optional but common among packages migrating from CommonJS to ESM.
+This practice is optional but it's a common pattern.
