@@ -317,3 +317,5 @@ myModule.initialize('foo');
 console.log('foo' in myModule); // true
 console.log('bar' in myModule); // true
 ```
+
+<!-- TODO(joyeecheung): document patterns that have no direct ESM equivalent e.g. exports with accessors, export with attributes -->
